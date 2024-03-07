@@ -1,40 +1,45 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using MediGate.DataService.Data;
 using MediGate.DataService.IRepository;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace MediGate.DataService.Repository
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        protected readonly ApplicationDbContext _context;
+        protected ApplicationDbContext _context;
         internal DbSet<T> dbSet;
-        public GenericRepository(ApplicationDbContext context)
+        protected readonly ILogger _logger;
+        public GenericRepository(ApplicationDbContext context, ILogger logger)
         {
             _context = context;
+            _logger = logger;
             dbSet = _context.Set<T>();
         }
-        public Task<bool> Add(T entity)
+        public virtual async Task<bool> Add(T entity)
+        {
+            await dbSet.AddAsync(entity);
+            return true;
+        }
+
+        public virtual async Task<bool> Delete(Guid id, string userId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Delete(Guid id, string userId)
+        public virtual async Task<IEnumerable<T>> GetAll()
         {
-            throw new NotImplementedException();
+            return await dbSet.ToListAsync();
         }
 
-        public Task<IEnumerable<T>> GetAll()
+        public virtual async Task<T> GetById(Guid id)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<T> GetById(Guid id)
-        {
-            throw new NotImplementedException();
+            return await dbSet.FindAsync(id);
         }
 
         public Task<bool> Upsert(T entity)
