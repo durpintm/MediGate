@@ -9,22 +9,18 @@ using MediGate.Entities.DbSet;
 using MediGate.Entities.DTOs.Incoming;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MediGate.Api.Controllers
+namespace MediGate.Api.Controllers.v1
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class UserController : ControllerBase
+    public class UserController : BaseController
     {
-        private IUnitOfWork _unitOfWork;
-
-        public UserController(IUnitOfWork unitOfWork) // ApplicationDbContext context
+        public UserController(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
-            _unitOfWork = unitOfWork;
         }
 
         //Get
         [HttpGet]
-        [Route("GetUsers")]
+        // [Route("GetUsers")]
+        [HttpHead]
         public async Task<IActionResult> GetUsers()
         {
             var users = await _unitOfWork.Users.GetAll();
