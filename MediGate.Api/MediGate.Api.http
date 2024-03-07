@@ -1,6 +1,6 @@
 @MediGate.Api_HostAddress = http://localhost:5016
 
-GET {{MediGate.Api_HostAddress}}/weatherforecast/
+GET {{MediGate.Api_HostAddress}}/[controller]/
 Accept: application/json
 
 ###
