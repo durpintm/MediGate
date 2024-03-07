@@ -14,12 +14,13 @@ namespace MediGate.DataService.Data
         private readonly ApplicationDbContext _context;
         private readonly ILogger _logger;
 
+
         public IUserRepository Users { get; private set; }
 
-        public UnitOfWork(ApplicationDbContext context, ILoggerFactory loggerFactory, IUserRepository userRepository)
+        public UnitOfWork(ApplicationDbContext context, ILogger<UnitOfWork> logger)
         {
             _context = context;
-            _logger = loggerFactory.CreateLogger("db_logs");
+            _logger = logger;
 
             Users = new UserRepository(_context, _logger);
         }

@@ -4,10 +4,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using MediGate.DataService.Data;
+using MediGate.DataService.IConfiguration;
 using MediGate.Entities.DbSet;
 using MediGate.Entities.DTOs.Incoming;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace MediGate.Api.Controllers
 {
@@ -15,26 +15,26 @@ namespace MediGate.Api.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private IUnitOfWork _unitOfWork;
 
-        public UserController(ApplicationDbContext context)
+        public UserController(IUnitOfWork unitOfWork) // ApplicationDbContext context
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         //Get
         [HttpGet]
         [Route("GetUsers")]
-        public IActionResult GetUsers()
+        public async Task<IActionResult> GetUsers()
         {
-            var users = _context.Users.Where(x => x.Status == 1).ToList();
+            var users = await _unitOfWork.Users.GetAll();
             return Ok(users);
         }
 
         //Post
         [HttpPost]
         [Route("AddUser")]
-        public IActionResult AddUser(UserDTO user)
+        public async Task<IActionResult> AddUser(UserDTO user)
         {
             var _user = new User();
             _user.FirstName = user.FirstName;
@@ -45,17 +45,17 @@ namespace MediGate.Api.Controllers
             _user.Country = user.Country;
             _user.Status = 1;
 
-            _context.Users.Add(_user);
-            _context.SaveChanges();
+            await _unitOfWork.Users.Add(_user);
+            await _unitOfWork.CompleteAsync();
 
-            return Ok(); // return a 201
+            return CreatedAtRoute("GetUser", new { id = _user.Id }, user); // return a 201
         }
 
         [HttpGet]
-        [Route("GetUser/{id}")]
-        public IActionResult GetUser(Guid Id)
+        [Route("GetUser/{id}", Name = "GetUser")]
+        public async Task<IActionResult> GetUser(Guid Id)
         {
-            var user = _context.Users.Where(x => x.Id == Id).FirstOrDefault();
+            var user = await _unitOfWork.Users.GetById(Id);
             return Ok(user);
         }
 

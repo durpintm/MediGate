@@ -14,7 +14,6 @@ namespace MediGate.DataService.Repository
     {
         public UserRepository(ApplicationDbContext context, ILogger logger) : base(context, logger)
         {
-
         }
 
         public override async Task<IEnumerable<User>> GetAll()
