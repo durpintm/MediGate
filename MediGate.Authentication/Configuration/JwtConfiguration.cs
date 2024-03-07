@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MediGate.Api.Configuration.Models
+namespace MediGate.Authentication.Configuration
 {
     public class JwtConfiguration
     {

@@ -21,6 +21,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\MediGate.DataService\MediGate.DataService.csproj" />
+		<ProjectReference Include="..\MediGate.Authentication\MediGate.Authentication.csproj" />
 	</ItemGroup>
 
 </Project>

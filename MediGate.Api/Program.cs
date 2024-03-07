@@ -1,5 +1,5 @@
 using System.Text;
-using MediGate.Api.Configuration.Models;
+using MediGate.Authentication.Configuration;
 using MediGate.DataService.Data;
 using MediGate.DataService.IConfiguration;
 using MediGate.DataService.IRepository;
