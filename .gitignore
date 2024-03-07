@@ -12,3 +12,5 @@ bin
 *.user
 settings.json
 **/Migrations
+app.db-shm
+app.db-wal
