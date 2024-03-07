@@ -11,3 +11,4 @@ bin
 **/data-mssql
 *.user
 settings.json
+**/Migrations

@@ -5,6 +5,10 @@ VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediGate.Api", "MediGate.Api.csproj", "{1CD5C374-1F75-47E6-90E5-C80989510614}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediGate.DataService", "..\MediGate.DataService\MediGate.DataService.csproj", "{447274D9-5210-4532-91D1-DF002E3B0DFD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediGate.Entities", "..\MediGate.Entities\MediGate.Entities.csproj", "{EA2AAC48-C824-430C-B439-32484331E148}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{1CD5C374-1F75-47E6-90E5-C80989510614}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CD5C374-1F75-47E6-90E5-C80989510614}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CD5C374-1F75-47E6-90E5-C80989510614}.Release|Any CPU.Build.0 = Release|Any CPU
+		{447274D9-5210-4532-91D1-DF002E3B0DFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{447274D9-5210-4532-91D1-DF002E3B0DFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{447274D9-5210-4532-91D1-DF002E3B0DFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{447274D9-5210-4532-91D1-DF002E3B0DFD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA2AAC48-C824-430C-B439-32484331E148}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA2AAC48-C824-430C-B439-32484331E148}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA2AAC48-C824-430C-B439-32484331E148}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA2AAC48-C824-430C-B439-32484331E148}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
