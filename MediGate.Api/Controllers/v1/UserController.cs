@@ -7,10 +7,13 @@ using MediGate.DataService.Data;
 using MediGate.DataService.IConfiguration;
 using MediGate.Entities.DbSet;
 using MediGate.Entities.DTOs.Incoming;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediGate.Api.Controllers.v1
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class UserController : BaseController
     {
         public UserController(IUnitOfWork unitOfWork) : base(unitOfWork)
