@@ -74,6 +74,7 @@ namespace MediGate.Api.Controllers.v1
 
                 // Adding user to the database
                 var _user = new User();
+                _user.UserId = new Guid(newUser.Id);
                 _user.FirstName = registrationDto.FirstName;
                 _user.LastName = registrationDto.LastName;
                 _user.Email = registrationDto.Email;
@@ -107,6 +108,63 @@ namespace MediGate.Api.Controllers.v1
             }
         }
 
+        [HttpPost]
+        [Route("Login")]
+        public async Task<IActionResult> Login([FromBody] UserLoginRequestDTO loginDto)
+        {
+            if (ModelState.IsValid)
+            {
+                // 1 - Check if email exist
+                var userExist = await _userManager.FindByEmailAsync(loginDto.Email);
+
+                if (userExist is null)
+                {
+                    return BadRequest(new UserLoginResponseDTO()
+                    {
+                        IsSuccess = false,
+                        Errors = new List<string>(){
+                            "Invalid Authentication Request"
+                        }
+                    });
+                }
+
+                // 2 - Check if the user has valid password
+                var isCorrect = await _userManager.CheckPasswordAsync(userExist, loginDto.Password);
+
+                if (isCorrect)
+                {
+                    // We need to generate the JWT Token
+                    var jwtToken = GenerateJwtToken(userExist);
+                    return Ok(new UserLoginResponseDTO()
+                    {
+                        IsSuccess = true,
+                        Token = jwtToken
+                    });
+                }
+                else
+                {
+                    return BadRequest(new UserLoginResponseDTO()
+                    {
+                        IsSuccess = false,
+                        Errors = new List<string>(){
+                            "Password doesn't match"
+                        }
+                    });
+                }
+
+            }
+            else // Invalid Object
+            {
+                return BadRequest(new UserRegistrationResponseDTO()
+                {
+                    IsSuccess = false,
+                    Errors = new List<string>(){
+                        "Invalid Payload"
+                        }
+                });
+            }
+
+        }
         private string GenerateJwtToken(IdentityUser user)
         {
             // The handler is going to be responsible for creating the token
