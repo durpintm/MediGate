@@ -20,6 +20,7 @@ namespace MediGate.Api.Controllers.v1
 {
     public class AccountsController : BaseController
     {
+        // Class provided by AspNetCore Identity Framework
         private readonly UserManager<IdentityUser> _userManager;
         private readonly JwtConfiguration _jwtConfig;
         public AccountsController(IUnitOfWork unitOfWork,
@@ -181,7 +182,7 @@ namespace MediGate.Api.Controllers.v1
                     new Claim(JwtRegisteredClaimNames.Email, user.Email),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) // Jti is used by refresh token
                 }),
-                Expires = DateTime.UtcNow.AddHours(2), // ToDo update the expiration time to minutes
+                Expires = DateTime.UtcNow.Add(_jwtConfig.ExpiryTimeFrame), // Update the expiration time to minutes
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature // ToDo review the algorithm down the road
