@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MediGate.Api.Controllers.v1
 {
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class UserController : BaseController
     {
         public UserController(IUnitOfWork unitOfWork,

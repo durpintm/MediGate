@@ -185,6 +185,8 @@ namespace MediGate.Api.Controllers.v1
             {
                 Subject = new ClaimsIdentity(new[] {
                     new Claim("Id", user.Id),
+                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id),
                     new Claim(JwtRegisteredClaimNames.Sub, user.Email), // sub refers to the unique ID
                     new Claim(JwtRegisteredClaimNames.Email, user.Email),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) // Jti is used by refresh token

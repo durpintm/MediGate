@@ -31,6 +31,24 @@ namespace MediGate.DataService.Repository
             }
         }
 
+        public async Task<User> GetByIdentityId(Guid identityId)
+        {
+            try
+            {
+                return await dbSet.Where(x => x.Status == 1
+                && x.UserId == identityId)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{Repo} GetByIdentityId method has generated error", typeof(UserRepository));
+                return null;
+            }
+        }
+
         public async Task<bool> UpdateUserProfile(User user)
         {
             try
