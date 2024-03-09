@@ -8,6 +8,7 @@ namespace MediGate.DataService.IRepository
 {
     public interface IUserRepository : IGenericRepository<User>
     {
+        Task<bool> UpdateUserProfile(User user);
 
     }
 }
