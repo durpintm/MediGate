@@ -36,8 +36,7 @@ namespace MediGate.DataService.Repository
             try
             {
                 return await dbSet.Where(x => x.Status == 1
-                && x.UserId == identityId)
-                .AsNoTracking()
+                && x.UserId == identityId) // UserId is IdentityId
                 .FirstOrDefaultAsync();
 
 
