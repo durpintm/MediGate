@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MediGate.Authentication.Models.DTO.Incoming
 {
-    public class TokenRequest
+    public class TokenRequestDTO
     {
         [Required]
         public string Token { get; set; }

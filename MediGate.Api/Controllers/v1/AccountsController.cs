@@ -228,6 +228,210 @@ namespace MediGate.Api.Controllers.v1
             return tokenData;
         }
 
+        [HttpPost]
+        [Route("RefreshToken")]
+        public async Task<IActionResult> RefreshToken([FromBody] TokenRequestDTO tokenRequestDTO)
+        {
+            if (ModelState.IsValid)
+            {
+                // Check if the token is valid
+                var result = await VerifyToken(tokenRequestDTO);
+
+                if (result is null)
+                {
+                    return BadRequest(new UserRegistrationResponseDTO()
+                    {
+                        IsSuccess = false,
+                        Errors = new List<string>(){
+                        "Token Validation Failed"
+                        }
+                    });
+                }
+                return Ok(result);
+
+            }
+            else // Invalid Object
+            {
+                return BadRequest(new UserRegistrationResponseDTO()
+                {
+                    IsSuccess = false,
+                    Errors = new List<string>(){
+                        "Invalid Payload"
+                        }
+                });
+            }
+
+        }
+
+        private async Task<AuthResult> VerifyToken(TokenRequestDTO tokenRequestDTO)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            try
+            {
+                // Check the validity of the token
+                var principal = tokenHandler.ValidateToken(tokenRequestDTO.Token, _tokenValidationParameters, out var validatedToken);
+
+                // We need to validate the results that has been generated for us
+                // Validate if the string is an actual token not a random stirng
+                if (validatedToken is JwtSecurityToken jwtSecurityToken)
+                {
+                    // Check if the Jwt token is created with the same algorithm as our jwt token
+                    var result = jwtSecurityToken.Header.Alg.
+                    Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
+
+                    if (!result)
+                        return null;
+                }
+
+                // We need to check the expiry date of the token
+                var utcExpiryDate = long.Parse(principal.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
+
+                // Convert to date to check
+                var expiryDate = UnixTimeStampToDateTime(utcExpiryDate);
+
+                // Checking if Jwt token has expired
+                if (expiryDate > DateTime.UtcNow)
+                {
+                    return new AuthResult()
+                    {
+                        IsSuccess = false,
+                        Errors = new List<string>()
+                        {
+                            "Jwt Token has not expired"
+                        }
+                    };
+                }
+
+                // Check if the refresh token exist
+                var refreshTokenExist = await _unitOfWork.RefreshTokens.GetByRefreshToken(tokenRequestDTO.RefreshToken);
+
+                if (refreshTokenExist is null)
+                {
+                    return new AuthResult()
+                    {
+                        IsSuccess = false,
+                        Errors = new List<string>()
+                        {
+                            "Invalid Refresh Token"
+                        }
+                    };
+                }
+
+                // Check the expiry date of refresh token
+                if (refreshTokenExist.ExpiryDate < DateTime.UtcNow)
+                {
+                    return new AuthResult()
+                    {
+                        IsSuccess = false,
+                        Errors = new List<string>()
+                        {
+                            "Refresh Token has expired, please login again"
+                        }
+                    };
+                }
+
+                // Check if refresh token has been used or not
+                if (refreshTokenExist.IsUsed)
+                {
+                    return new AuthResult()
+                    {
+                        IsSuccess = false,
+                        Errors = new List<string>()
+                        {
+                            "Refresh Token has been used, it cannot be used"
+                        }
+                    };
+                }
+
+                // Check refresh token if it has been revoked
+                if (refreshTokenExist.IsRevoked)
+                {
+                    return new AuthResult()
+                    {
+                        IsSuccess = false,
+                        Errors = new List<string>()
+                        {
+                            "Refresh Token has been revoked, it cannot be used"
+                        }
+                    };
+                }
+
+                var jti = principal.Claims.SingleOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
+
+                if (refreshTokenExist.JwtId != jti)
+                {
+                    return new AuthResult()
+                    {
+                        IsSuccess = false,
+                        Errors = new List<string>()
+                        {
+                            "Refresh Token reference does not match the Jwt token"
+                        }
+                    };
+                }
+
+                // Start processing and get a new token
+                refreshTokenExist.IsUsed = true;
+                var updateResult = await _unitOfWork.RefreshTokens.MarkRefreshTokenAsUsed(refreshTokenExist);
+                if (updateResult)
+                {
+                    await _unitOfWork.CompleteAsync();
+
+                    // Get the user to generate a new Jwt token
+                    var dbUser = await _userManager.FindByIdAsync(refreshTokenExist.UserId);
+
+                    if (dbUser is null)
+                    {
+                        return new AuthResult()
+                        {
+                            IsSuccess = false,
+                            Errors = new List<string>()
+                            {
+                                "Error processing request"
+                            }
+                        };
+                    }
+
+                    // Generate a Jwt token
+                    var tokens = await GenerateJwtToken(dbUser);
+
+                    return new AuthResult()
+                    {
+                        IsSuccess = true,
+                        Token = tokens.JwtToken,
+                        RefreshToken = tokens.RefreshToken
+
+                    };
+                }
+
+                return new AuthResult()
+                {
+                    IsSuccess = false,
+                    Errors = new List<string>()
+                    {
+                        "Error processing request"
+                    }
+                };
+            }
+            catch (Exception)
+            {
+                // ToDo: add better error handling, and add a logger
+                return null;
+
+            }
+        }
+
+        private DateTime UnixTimeStampToDateTime(long unixDate)
+        {
+            // Sets the time to 1, Jan 1970
+            var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+
+            // Add the number of seconds from 1 Jan 1970
+            dateTime = dateTime.AddSeconds(unixDate).ToUniversalTime();
+            return dateTime;
+
+
+        }
         private string RandomStringGenerator(int length)
         {
 
