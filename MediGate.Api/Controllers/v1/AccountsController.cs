@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using MediGate.Authentication.Configuration;
+using MediGate.Authentication.Models.DTO.Generic;
 using MediGate.Authentication.Models.DTO.Incoming;
 using MediGate.Authentication.Models.DTO.Outgoing;
 using MediGate.DataService.IConfiguration;
@@ -22,13 +23,18 @@ namespace MediGate.Api.Controllers.v1
     {
         // Class provided by AspNetCore Identity Framework
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly TokenValidationParameters _tokenValidationParameters;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly JwtConfiguration _jwtConfig;
         public AccountsController(IUnitOfWork unitOfWork,
         UserManager<IdentityUser> userManager,
+        TokenValidationParameters tokenValidationParameters,
         IOptionsMonitor<JwtConfiguration> optionsMonitor) : base(unitOfWork)
         {
             _userManager = userManager;
             _jwtConfig = optionsMonitor.CurrentValue;
+            _unitOfWork = unitOfWork;
+            _tokenValidationParameters = tokenValidationParameters;
         }
 
         // Register Action
@@ -88,13 +94,14 @@ namespace MediGate.Api.Controllers.v1
                 await _unitOfWork.CompleteAsync();
 
                 // Create a Jwt Token
-                var token = GenerateJwtToken(newUser);
+                var token = await GenerateJwtToken(newUser);
 
                 // Return it back to the user
                 return Ok(new UserRegistrationResponseDTO()
                 {
                     IsSuccess = true,
-                    Token = token
+                    Token = token.JwtToken,
+                    RefreshToken = token.RefreshToken
                 });
             }
             else // Invalid object
@@ -135,11 +142,12 @@ namespace MediGate.Api.Controllers.v1
                 if (isCorrect)
                 {
                     // We need to generate the JWT Token
-                    var jwtToken = GenerateJwtToken(userExist);
+                    var token = await GenerateJwtToken(userExist);
                     return Ok(new UserLoginResponseDTO()
                     {
                         IsSuccess = true,
-                        Token = jwtToken
+                        Token = token.JwtToken,
+                        RefreshToken = token.RefreshToken
                     });
                 }
                 else
@@ -166,7 +174,7 @@ namespace MediGate.Api.Controllers.v1
             }
 
         }
-        private string GenerateJwtToken(IdentityUser user)
+        private async Task<TokenData> GenerateJwtToken(IdentityUser user)
         {
             // The handler is going to be responsible for creating the token
             var jwtHandler = new JwtSecurityTokenHandler();
@@ -195,7 +203,38 @@ namespace MediGate.Api.Controllers.v1
             // Convert the security object token into the string
             var jwtToken = jwtHandler.WriteToken(token);
 
-            return jwtToken;
+            // Generate Refresh token
+            var refreshToken = new RefreshToken
+            {
+                AddedDate = DateTime.UtcNow,
+                Token = $"{RandomStringGenerator(25)}_{Guid.NewGuid()}", // 
+                UserId = user.Id,
+                IsRevoked = false,
+                IsUsed = false,
+                Status = 1,
+                JwtId = token.Id,
+                ExpiryDate = DateTime.UtcNow.AddMonths(6)
+            };
+
+            await _unitOfWork.RefreshTokens.Add(refreshToken);
+            await _unitOfWork.CompleteAsync();
+
+            var tokenData = new TokenData
+            {
+                JwtToken = jwtToken,
+                RefreshToken = refreshToken.Token
+            };
+
+            return tokenData;
+        }
+
+        private string RandomStringGenerator(int length)
+        {
+
+            var random = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            return new string(Enumerable.Repeat(chars, length)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }

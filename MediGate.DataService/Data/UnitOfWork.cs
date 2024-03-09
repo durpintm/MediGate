@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MediGate.DataService.IConfiguration;
 using MediGate.DataService.IRepository;
 using MediGate.DataService.Repository;
+using MediGate.Entities.DbSet;
 using Microsoft.Extensions.Logging;
 
 namespace MediGate.DataService.Data
@@ -17,12 +18,15 @@ namespace MediGate.DataService.Data
 
         public IUserRepository Users { get; private set; }
 
+        public IRefreshTokenRepository RefreshTokens { get; private set; }
+
         public UnitOfWork(ApplicationDbContext context, ILogger<UnitOfWork> logger)
         {
             _context = context;
             _logger = logger;
 
             Users = new UserRepository(_context, _logger);
+            RefreshTokens = new RefreshTokenRepository(context, _logger);
         }
 
         public async Task CompleteAsync()
