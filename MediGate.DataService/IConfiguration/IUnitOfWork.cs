@@ -9,6 +9,7 @@ namespace MediGate.DataService.IConfiguration
     public interface IUnitOfWork
     {
         IUserRepository Users { get; }
+        IRefreshTokenRepository RefreshTokens { get; }
 
         Task CompleteAsync();
     }
