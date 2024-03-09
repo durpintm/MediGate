@@ -22,16 +22,14 @@ namespace MediGate.Api.Controllers.v1
     public class AccountsController : BaseController
     {
         // Class provided by AspNetCore Identity Framework
-        private readonly UserManager<IdentityUser> _userManager;
         private readonly TokenValidationParameters _tokenValidationParameters;
         private readonly IUnitOfWork _unitOfWork;
         private readonly JwtConfiguration _jwtConfig;
         public AccountsController(IUnitOfWork unitOfWork,
         UserManager<IdentityUser> userManager,
         TokenValidationParameters tokenValidationParameters,
-        IOptionsMonitor<JwtConfiguration> optionsMonitor) : base(unitOfWork)
+        IOptionsMonitor<JwtConfiguration> optionsMonitor) : base(unitOfWork, userManager)
         {
-            _userManager = userManager;
             _jwtConfig = optionsMonitor.CurrentValue;
             _unitOfWork = unitOfWork;
             _tokenValidationParameters = tokenValidationParameters;
@@ -186,6 +184,7 @@ namespace MediGate.Api.Controllers.v1
             {
                 Subject = new ClaimsIdentity(new[] {
                     new Claim("Id", user.Id),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id),
                     new Claim(JwtRegisteredClaimNames.Sub, user.Email), // sub refers to the unique ID
                     new Claim(JwtRegisteredClaimNames.Email, user.Email),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) // Jti is used by refresh token
