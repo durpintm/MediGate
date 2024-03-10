@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MediGate.Cofiguration.Messages;
 using AutoMapper;
+using MediGate.Entities.DTOs.Outgoing.Profiles;
 
 namespace MediGate.Api.Controllers.v1
 {
@@ -31,7 +32,7 @@ namespace MediGate.Api.Controllers.v1
         public async Task<IActionResult> GetProfile()
         {
             var loggedInUser = await _userManager.GetUserAsync(HttpContext.User);
-            var result = new Result<User>();
+            var result = new Result<ProfileDTO>();
 
             if (loggedInUser is null)
             {
@@ -48,14 +49,15 @@ namespace MediGate.Api.Controllers.v1
                 return BadRequest(result);
             }
 
-            result.Content = profile;
+            var mappedProfile = _mapper.Map<ProfileDTO>(profile);
+            result.Content = mappedProfile;
             return Ok(result);
         }
 
         [HttpPut]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDTO profile)
         {
-            var result = new Result<User>();
+            var result = new Result<ProfileDTO>();
 
             // If the model is valid
             if (!ModelState.IsValid)
@@ -95,7 +97,8 @@ namespace MediGate.Api.Controllers.v1
                 return BadRequest(result);
             }
             await _unitOfWork.CompleteAsync();
-            result.Content = userProfile;
+            var mappedProfile = _mapper.Map<ProfileDTO>(userProfile);
+            result.Content = mappedProfile;
             return Ok(result);
 
         }

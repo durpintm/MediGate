@@ -10,6 +10,7 @@ using MediGate.DataService.IConfiguration;
 using MediGate.Entities.DbSet;
 using MediGate.Entities.DTOs.Generic;
 using MediGate.Entities.DTOs.Incoming;
+using MediGate.Entities.DTOs.Outgoing.Profiles;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -43,19 +44,23 @@ namespace MediGate.Api.Controllers.v1
         [Route("AddUser")]
         public async Task<IActionResult> AddUser(UserDTO user)
         {
-            var _user = new User();
-            _user.FirstName = user.FirstName;
-            _user.LastName = user.LastName;
-            _user.Email = user.Email;
-            _user.DateOfBirth = Convert.ToDateTime(user.DateOfBirth);
-            _user.Phone = user.Phone;
-            _user.Country = user.Country;
-            _user.Status = 1;
+            var _mappedUser = _mapper.Map<User>(user);
+            // var _user = new User();
+            // _user.FirstName = user.FirstName;
+            // _user.LastName = user.LastName;
+            // _user.Email = user.Email;
+            // _user.DateOfBirth = Convert.ToDateTime(user.DateOfBirth);
+            // _user.Phone = user.Phone;
+            // _user.Country = user.Country;
+            // _user.Status = 1;
 
-            await _unitOfWork.Users.Add(_user);
+            await _unitOfWork.Users.Add(_mappedUser);
             await _unitOfWork.CompleteAsync();
 
-            return CreatedAtRoute("GetUser", new { id = _user.Id }, user); // return a 201
+            //Todo: Add the correct return to this action
+            var result = new Result<UserDTO>();
+            result.Content = user;
+            return CreatedAtRoute("GetUser", new { id = _mappedUser.Id }, result); // return a 201
         }
 
         [HttpGet]
@@ -63,11 +68,12 @@ namespace MediGate.Api.Controllers.v1
         public async Task<IActionResult> GetUser(Guid Id)
         {
             var user = await _unitOfWork.Users.GetById(Id);
-            var result = new Result<User>();
+            var result = new Result<ProfileDTO>();
 
             if (user is not null)
             {
-                result.Content = user;
+                var mappedProfile = _mapper.Map<ProfileDTO>(user);
+                result.Content = mappedProfile;
                 return Ok(result);
             }
 
