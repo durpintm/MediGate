@@ -4,6 +4,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using MediGate.DataService.IConfiguration;
+using MediGate.Entities.DbSet;
+using MediGate.Entities.DTOs.Errors;
+using MediGate.Entities.DTOs.Generic;
 using MediGate.Entities.DTOs.Incoming.Profile;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -26,10 +29,19 @@ namespace MediGate.Api.Controllers.v1
         public async Task<IActionResult> GetProfile()
         {
             var loggedInUser = await _userManager.GetUserAsync(HttpContext.User);
+            var result = new Result<User>();
 
             if (loggedInUser is null)
             {
-                return BadRequest("User not found");
+                result.Error = new Error()
+                {
+                    Code = 400,
+                    Type = "Bad Request",
+                    Message = "User not found"
+
+                };
+
+                return BadRequest(result);
             }
 
             var identityId = new Guid(loggedInUser.Id);
@@ -37,10 +49,20 @@ namespace MediGate.Api.Controllers.v1
 
             if (profile is null)
             {
-                return BadRequest("User not found");
+
+                result.Error = new Error()
+                {
+                    Code = 400,
+                    Type = "Bad Request",
+                    Message = "User not found"
+
+                };
+                return BadRequest(result);
             }
 
-            return Ok(profile);
+            result.Content = profile;
+
+            return Ok(result);
         }
 
         [HttpPut]
