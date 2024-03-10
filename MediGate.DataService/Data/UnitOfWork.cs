@@ -19,6 +19,8 @@ namespace MediGate.DataService.Data
         public IUserRepository Users { get; private set; }
 
         public IRefreshTokenRepository RefreshTokens { get; private set; }
+        public IHealthDataRepository HealthData { get; private set; }
+
 
         public UnitOfWork(ApplicationDbContext context, ILogger<UnitOfWork> logger)
         {
@@ -27,6 +29,7 @@ namespace MediGate.DataService.Data
 
             Users = new UserRepository(_context, _logger);
             RefreshTokens = new RefreshTokenRepository(context, _logger);
+            HealthData = new HealthDataRepository(context, logger);
         }
 
         public async Task CompleteAsync()

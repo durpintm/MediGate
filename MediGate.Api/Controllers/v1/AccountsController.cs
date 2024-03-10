@@ -24,7 +24,6 @@ namespace MediGate.Api.Controllers.v1
     {
         // Class provided by AspNetCore Identity Framework
         private readonly TokenValidationParameters _tokenValidationParameters;
-        private readonly IUnitOfWork _unitOfWork;
         private readonly JwtConfiguration _jwtConfig;
         public AccountsController(IUnitOfWork unitOfWork,
         IMapper mapper,

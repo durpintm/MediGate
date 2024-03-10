@@ -10,6 +10,7 @@ namespace MediGate.DataService.IConfiguration
     {
         IUserRepository Users { get; }
         IRefreshTokenRepository RefreshTokens { get; }
+        IHealthDataRepository HealthData { get; }
 
         Task CompleteAsync();
     }
