@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using MediGate.Authentication.Configuration;
 using MediGate.Authentication.Models.DTO.Generic;
 using MediGate.Authentication.Models.DTO.Incoming;
@@ -26,9 +27,10 @@ namespace MediGate.Api.Controllers.v1
         private readonly IUnitOfWork _unitOfWork;
         private readonly JwtConfiguration _jwtConfig;
         public AccountsController(IUnitOfWork unitOfWork,
+        IMapper mapper,
         UserManager<IdentityUser> userManager,
         TokenValidationParameters tokenValidationParameters,
-        IOptionsMonitor<JwtConfiguration> optionsMonitor) : base(unitOfWork, userManager)
+        IOptionsMonitor<JwtConfiguration> optionsMonitor) : base(unitOfWork, userManager, mapper)
         {
             _userManager = userManager;
             _jwtConfig = optionsMonitor.CurrentValue;

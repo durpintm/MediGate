@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MediGate.Cofiguration.Messages;
+using AutoMapper;
 
 namespace MediGate.Api.Controllers.v1
 {
@@ -21,7 +23,7 @@ namespace MediGate.Api.Controllers.v1
     public class ProfileController : BaseController
     {
         public ProfileController(IUnitOfWork unitOfWork,
-        UserManager<IdentityUser> userManager) : base(unitOfWork, userManager)
+        UserManager<IdentityUser> userManager, IMapper mapper) : base(unitOfWork, userManager, mapper)
         {
         }
 
@@ -33,14 +35,7 @@ namespace MediGate.Api.Controllers.v1
 
             if (loggedInUser is null)
             {
-                result.Error = new Error()
-                {
-                    Code = 400,
-                    Type = "Bad Request",
-                    Message = "User not found"
-
-                };
-
+                result.Error = PopulateError(400, ErrorMessages.Generic.TypeBadRequest, ErrorMessages.Profile.UserNotFound);
                 return BadRequest(result);
             }
 
@@ -49,14 +44,7 @@ namespace MediGate.Api.Controllers.v1
 
             if (profile is null)
             {
-
-                result.Error = new Error()
-                {
-                    Code = 400,
-                    Type = "Bad Request",
-                    Message = "User not found"
-
-                };
+                result.Error = PopulateError(400, ErrorMessages.Generic.TypeBadRequest, ErrorMessages.Profile.UserNotFound);
                 return BadRequest(result);
             }
 
@@ -72,13 +60,7 @@ namespace MediGate.Api.Controllers.v1
             // If the model is valid
             if (!ModelState.IsValid)
             {
-                result.Error = new Error()
-                {
-                    Code = 400,
-                    Type = "Bad Request",
-                    Message = "Invalid Payload"
-
-                };
+                result.Error = PopulateError(400, ErrorMessages.Generic.TypeBadRequest, ErrorMessages.Generic.InvalidPayload);
                 return BadRequest(result);
             }
 
@@ -86,13 +68,7 @@ namespace MediGate.Api.Controllers.v1
 
             if (loggedInUser is null)
             {
-                result.Error = new Error()
-                {
-                    Code = 400,
-                    Type = "Bad Request",
-                    Message = "User not found"
-
-                };
+                result.Error = PopulateError(400, ErrorMessages.Generic.TypeBadRequest, ErrorMessages.Profile.UserNotFound);
                 return BadRequest(result);
             }
 
@@ -101,13 +77,7 @@ namespace MediGate.Api.Controllers.v1
 
             if (userProfile is null)
             {
-                result.Error = new Error()
-                {
-                    Code = 400,
-                    Type = "Bad Request",
-                    Message = "User not found"
-
-                };
+                result.Error = PopulateError(400, ErrorMessages.Generic.TypeBadRequest, ErrorMessages.Profile.UserNotFound);
                 return BadRequest(result);
             }
 
@@ -120,13 +90,8 @@ namespace MediGate.Api.Controllers.v1
 
             if (!isUpdated)
             {
-                result.Error = new Error()
-                {
-                    Code = 500,
-                    Type = "Unable to process request",
-                    Message = "Something went wrong, Please try again later!"
+                result.Error = PopulateError(500, ErrorMessages.Generic.UnableToProcess, ErrorMessages.Generic.SomethingWentWrong);
 
-                };
                 return BadRequest(result);
             }
             await _unitOfWork.CompleteAsync();

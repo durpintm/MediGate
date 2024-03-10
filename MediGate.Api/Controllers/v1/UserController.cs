@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using MediGate.Cofiguration.Messages;
 using MediGate.DataService.Data;
 using MediGate.DataService.IConfiguration;
 using MediGate.Entities.DbSet;
+using MediGate.Entities.DTOs.Generic;
 using MediGate.Entities.DTOs.Incoming;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -18,7 +21,7 @@ namespace MediGate.Api.Controllers.v1
     public class UserController : BaseController
     {
         public UserController(IUnitOfWork unitOfWork,
-        UserManager<IdentityUser> userManager) : base(unitOfWork, userManager)
+        UserManager<IdentityUser> userManager, IMapper mapper) : base(unitOfWork, userManager, mapper)
         {
         }
 
@@ -29,7 +32,10 @@ namespace MediGate.Api.Controllers.v1
         public async Task<IActionResult> GetUsers()
         {
             var users = await _unitOfWork.Users.GetAll();
-            return Ok(users);
+            var result = new PagedResult<User>();
+            result.Content = users.ToList();
+            result.ResultCount = users.Count();
+            return Ok(result);
         }
 
         //Post
@@ -57,7 +63,18 @@ namespace MediGate.Api.Controllers.v1
         public async Task<IActionResult> GetUser(Guid Id)
         {
             var user = await _unitOfWork.Users.GetById(Id);
-            return Ok(user);
+            var result = new Result<User>();
+
+            if (user is not null)
+            {
+                result.Content = user;
+                return Ok(result);
+            }
+
+            result.Error = PopulateError(404, ErrorMessages.Generic.ObjectNotFound, ErrorMessages.Users.UserNotFound);
+
+            return BadRequest(result);
+
         }
 
     }

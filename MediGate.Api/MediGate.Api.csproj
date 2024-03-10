@@ -7,6 +7,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+			<PackageReference Include="AutoMapper" Version="12.0.1" />
+			<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
 			<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.16" />
 			<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.16" />
 			<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.16" />
@@ -22,6 +24,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\MediGate.DataService\MediGate.DataService.csproj" />
 		<ProjectReference Include="..\MediGate.Authentication\MediGate.Authentication.csproj" />
+		<ProjectReference Include="..\MediGate.Cofiguration\MediGate.Cofiguration.csproj" />
 	</ItemGroup>
 
 </Project>
