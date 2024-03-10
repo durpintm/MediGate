@@ -61,24 +61,39 @@ namespace MediGate.Api.Controllers.v1
             }
 
             result.Content = profile;
-
             return Ok(result);
         }
 
         [HttpPut]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDTO profile)
         {
+            var result = new Result<User>();
+
             // If the model is valid
             if (!ModelState.IsValid)
             {
-                return BadRequest("Invalid Payload");
+                result.Error = new Error()
+                {
+                    Code = 400,
+                    Type = "Bad Request",
+                    Message = "Invalid Payload"
+
+                };
+                return BadRequest(result);
             }
 
             var loggedInUser = await _userManager.GetUserAsync(HttpContext.User);
 
             if (loggedInUser is null)
             {
-                return BadRequest("User not found");
+                result.Error = new Error()
+                {
+                    Code = 400,
+                    Type = "Bad Request",
+                    Message = "User not found"
+
+                };
+                return BadRequest(result);
             }
 
             var identityId = new Guid(loggedInUser.Id);
@@ -86,7 +101,14 @@ namespace MediGate.Api.Controllers.v1
 
             if (userProfile is null)
             {
-                return BadRequest("User not found");
+                result.Error = new Error()
+                {
+                    Code = 400,
+                    Type = "Bad Request",
+                    Message = "User not found"
+
+                };
+                return BadRequest(result);
             }
 
             userProfile.Address = profile.Address;
@@ -98,10 +120,18 @@ namespace MediGate.Api.Controllers.v1
 
             if (!isUpdated)
             {
-                return BadRequest("Something went wrong, Please try again later!");
+                result.Error = new Error()
+                {
+                    Code = 500,
+                    Type = "Unable to process request",
+                    Message = "Something went wrong, Please try again later!"
+
+                };
+                return BadRequest(result);
             }
             await _unitOfWork.CompleteAsync();
-            return Ok(userProfile);
+            result.Content = userProfile;
+            return Ok(result);
 
         }
     }
